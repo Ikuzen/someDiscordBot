@@ -22,7 +22,11 @@ client.on('message', message => {
 });
 
 client.on('messageReactionAdd', (reaction, user) =>{
-  BotReactionsHandler.next(reaction, user);
+  BotReactionsHandler.next(reaction, user, {type:"add"});
+})
+
+client.on('messageReactionRemove', (reaction, user) =>{
+  BotReactionsHandler.next(reaction, user, {type:"remove"});
 })
 
 const token = DISCORD_TOKEN;

@@ -1,34 +1,51 @@
-import { MessageReaction, PartialUser, User } from "discord.js";
+import { GuildMember, MessageReaction, PartialUser, Role, User } from "discord.js";
 import { roleChannelId, roleMessageId } from "../config";
 import { updateAndGetRoleList } from "../roles";
 import { clearReacts } from "./reactions";
 
 const roleId = roleMessageId;
 
+const roleMap = {
+  "💩": "poop",
+  "💰": "money"
+}
+
+interface Options{
+  type:string
+}
+
+
+function addRole(member: GuildMember, roleList: Role[], reaction: MessageReaction){
+  let emoji = reaction.emoji.name;
+  // @ts-ignore
+  let roleId = roleList?.find((role)=> role.name === roleMap[emoji])?.id
+  if(roleId)member.roles.add(roleId);
+  console.log("adding")
+
+}
+
+function removeRole(member: GuildMember, roleList: Role[], reaction: MessageReaction){
+  let emoji = reaction.emoji.name;
+  // @ts-ignore
+  let roleId = roleList?.find((role)=> role.name === roleMap[emoji])?.id
+  console.log("removing")
+  if(roleId)member.roles.remove(roleId);
+}
+
+
 export class BotReactionsHandler {
-  static async next(messageReaction: MessageReaction, user: User | PartialUser, channelList?: string[]) {
+  static async next(messageReaction: MessageReaction, user: User | PartialUser, options?:Options) {
     let message = messageReaction.message
-    if (messageReaction.message.id === roleId) {
-      const filter = (reaction:any, user:any) => {
-        return ['💩', '💰'].includes(reaction.emoji.name) && user.id === message.author.id;
-      };
-
+    let reactUser = await messageReaction.message.guild?.members.fetch(user.id);
+    if (messageReaction.message.id === roleId && reactUser) {
       let roleList = await updateAndGetRoleList(messageReaction.message);
-      if (messageReaction.emoji.name === "💩") {
-        let poopRole = roleList?.find((role) => role.name === "poop")
-        
-        if (poopRole) {
-          console.log("adding role")
-          messageReaction.message.guild?.members.fetch(user.id)
-          .then((userWhoReacted)=>{
-            userWhoReacted.roles.set(poopRole);
-          })
-          console.log(messageReaction.message.guild)
-          
-        }
-      }
-      else if (messageReaction.emoji.name === "💰") {
-
+      if(roleList){
+        if(options?.type === "add"){
+          addRole(reactUser, roleList, messageReaction);
+         }
+        else if (options?.type === "remove"){
+          removeRole(reactUser, roleList, messageReaction) ;
+        } 
       }
     };
 
