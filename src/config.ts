@@ -14,6 +14,9 @@ function env(name: string): string {
     return value;
 }
 
-export let uri: string;
 export const DISCORD_TOKEN = env('DISCORD_TOKEN');
 export const WEBHOOK = env('WEBHOOK');
+export const prefix = "/";
+export const roleChannelId = env("ROLE_CHANNEL_ID");
+export const botChannelId = env("BOT_CHANNEL_ID");
+export const roleMessageId = env("ROLE_MESSAGE_ID")

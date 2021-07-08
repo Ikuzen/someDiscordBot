@@ -1,23 +1,29 @@
-import { Client } from "discord.js";
-import { DISCORD_TOKEN } from "./config";
+import { Client, TextChannel } from "discord.js";
+import { BotCommandHandler } from "./commands";
+import { botChannelId, DISCORD_TOKEN, prefix } from "./config";
+import { BotReactionsHandler } from "./reactions";
+import { updateAndGetRoleList } from "./roles";
 
-const client = new Client();
+export const client = new Client({ partials: ['MESSAGE', 'CHANNEL', 'REACTION'] });
+
 
 client.on("ready", () => {
     console.log(`Logged in as ${ client?.user?.tag }`);
 });
 
-client.on("message", message => {
-    console.log(message.content);
+client.on('message', message => {
+	console.log(message.content);
+  // case command
+  if(message.content[0] === prefix){
+    BotCommandHandler.next(message, [botChannelId])
+  }
+  // message.awaitReactions()
+	// .then(collected => {)
 });
 
-client.on("messageUpdate", (oldMessage, newMessage) => {
-    console.log(oldMessage.content, " -> ", newMessage.content);
-});
-
-client.on("messageDelete", message => {
-    console.log("deleted:", message.content)
-});
+client.on('messageReactionAdd', (reaction, user) =>{
+  BotReactionsHandler.next(reaction, user);
+})
 
 const token = DISCORD_TOKEN;
 if (!token) {
